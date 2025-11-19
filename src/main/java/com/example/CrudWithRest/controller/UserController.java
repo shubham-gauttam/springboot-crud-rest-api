@@ -3,6 +3,7 @@ package com.example.CrudWithRest.controller;
 import com.example.CrudWithRest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.example.CrudWithRest.entities.User;
 
@@ -14,6 +15,26 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody User user) {
+
+        // password encode
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // default role
+        if(user.getRole() == null) {
+            user.setRole("ROLE_USER");
+        }
+
+        User savedUser = userService.createUser(user);
+
+        return ResponseEntity.status(201).body(savedUser);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<User> create(@RequestBody User user) {
